@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Virtual Try-On MVP
 
-## Getting Started
+A Mobile-First Virtual Try-On application using Next.js, MediaPipe Face Mesh, and React Three Fiber.
 
-First, run the development server:
+## Features
+- **Real-time Face Tracking**: Uses MediaPipe Face Mesh to detect facial landmarks.
+- **3D Glasses Overlay**: Anchors 3D models to the eyes and nose bridge.
+- **Interactive UI**: Switch between different glasses models.
+- **Mobile Optimized**: Designed for mobile browsers.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Prerequisite
+You must have Node.js installed.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2.  **Add 3D Models**:
+    Place your `.glb` files in `public/models/`.
+    - `public/models/glasses1.glb`
+    - `public/models/glasses2.glb`
+    - `public/models/glasses3.glb`
 
-## Learn More
+3.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) (or your local IP for mobile testing).
 
-To learn more about Next.js, take a look at the following resources:
+## Repository Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project has been initialized with a local Git repository. To push to GitHub:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1.  Create a new repository on GitHub named `virtual-try-on-mvp`.
+2.  Run the following commands:
+    ```bash
+    git remote add origin https://github.com/YOUR_USERNAME/virtual-try-on-mvp.git
+    git branch -M main
+    git push -u origin main
+    ```
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Technologies
+- [Next.js](https://nextjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [MediaPipe Face Mesh](https://google.github.io/mediapipe/solutions/face_mesh)
+- [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
