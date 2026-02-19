@@ -18,18 +18,20 @@ export default function GlassesModel({ modelUrl, position, rotation, faceWidth, 
     const { scene } = useGLTF(modelUrl);
     const groupRef = useRef<THREE.Group>(null);
     const nativeWidthRef = useRef(0);
+    const nativeHeightRef = useRef(0);
 
     // Clone scene to avoid sharing state between instances (if multiple)
     const clone = React.useMemo(() => scene.clone(), [scene]);
 
-    // Calculate native width once per model load
+    // Store native bounding box dimensions once per model load
     useEffect(() => {
         if (clone) {
             const box = new THREE.Box3().setFromObject(clone);
             const size = new THREE.Vector3();
             box.getSize(size);
             nativeWidthRef.current = size.x;
-            console.log("GlassesModel: Native Width", size.x);
+            nativeHeightRef.current = size.y;
+            console.log("GlassesModel: Native Size", size.x, size.y, size.z);
         }
     }, [clone]);
 
@@ -40,13 +42,21 @@ export default function GlassesModel({ modelUrl, position, rotation, faceWidth, 
         // Ideally use a more robust mock/filter, but lerp is okay for MVP
         const DAMPING = 0.9;
 
-        // Position
-        // Add Z offset (+10) to prevent clipping. 
-        // Add Y offset (-5) to lower glasses slightly down nose bridge (MP bridge is high)
-        // Use Lerp for smoothing
+        // Scale first so we can derive pixel-correct Y offset from the model's own size
+        let currentScale = groupRef.current.scale.x;
+        if (nativeWidthRef.current > 0) {
+            const targetScale = faceWidth / nativeWidthRef.current;
+            currentScale = THREE.MathUtils.lerp(currentScale || targetScale, targetScale, 0.15);
+            groupRef.current.scale.setScalar(currentScale);
+        }
+
+        // Position — anchor is the pupil midpoint.
+        // Shift Y down by half the rendered height so the lens center sits on the pupils.
         const targetPos = position.clone();
-        targetPos.z += 10;
-        targetPos.y -= 5;
+        if (nativeHeightRef.current > 0 && currentScale > 0) {
+            targetPos.y -= (nativeHeightRef.current * currentScale) * 0.15; // slight downward nudge
+        }
+        targetPos.z += 5; // small Z push to avoid z-fighting with skin
         groupRef.current.position.lerp(targetPos, DAMPING);
 
         // Rotation - Face rotation is now a Quaternion
@@ -71,18 +81,7 @@ export default function GlassesModel({ modelUrl, position, rotation, faceWidth, 
 
         groupRef.current.quaternion.slerp(targetQuat, DAMPING);
 
-        // Scale Logic (in frame loop to avoid state re-renders)
-        if (nativeWidthRef.current > 0) {
-            // Desired width = Face Width (Temple-to-Temple)
-            // With CameraRig/ClientDim, this maps 1:1.
-            const desiredWidth = faceWidth;
-            const targetScale = (desiredWidth / nativeWidthRef.current); // Apply 1.0 base
-
-            // Lerp current scale
-            const currentScale = groupRef.current.scale.x;
-            const newScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.1);
-            groupRef.current.scale.setScalar(newScale);
-        }
+        // (Scale already applied above, before position offset)
     });
 
     return (
@@ -97,4 +96,8 @@ export default function GlassesModel({ modelUrl, position, rotation, faceWidth, 
 
 
 // Preload models to avoid popping
-// useGLTF.preload('/models/glasses1.glb'); // Enable when files exist
+useGLTF.preload('/models/glasses1.glb');
+useGLTF.preload('/models/glasses2.glb');
+useGLTF.preload('/models/glasses3.glb');
+useGLTF.preload('/models/glasses4.glb');
+useGLTF.preload('/models/glasses5.glb');

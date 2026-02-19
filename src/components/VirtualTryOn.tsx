@@ -39,7 +39,7 @@ const GLASSES_LIST = [
         name: 'Classic Aviator',
         model: '/models/glasses1.glb',
         scale: 1.0,
-        rotationOffset: new THREE.Euler(0, 0, Math.PI)
+        rotationOffset: new THREE.Euler(-Math.PI * 3 / 4, 0, Math.PI)
     },
     // Model 2: User says this was good with the previous -90 X fix.
     {
@@ -54,6 +54,22 @@ const GLASSES_LIST = [
         id: 3,
         name: 'Retro Round',
         model: '/models/glasses3.glb',
+        scale: 1.0,
+        rotationOffset: new THREE.Euler(-Math.PI / 2, 0, 0)
+    },
+    // Model 4: New model
+    {
+        id: 4,
+        name: 'Bold Wayfarer',
+        model: '/models/glasses4.glb',
+        scale: 1.0,
+        rotationOffset: new THREE.Euler(-Math.PI / 2, 0, 0)
+    },
+    // Model 5: New model
+    {
+        id: 5,
+        name: 'Slim Cat-Eye',
+        model: '/models/glasses5.glb',
         scale: 1.0,
         rotationOffset: new THREE.Euler(-Math.PI / 2, 0, 0)
     },
@@ -161,23 +177,25 @@ export default function VirtualTryOn() {
 
         const landmarks = results.multiFaceLandmarks[0];
 
-        // 1. Calculate Position
-        // Use Nose Bridge (168) as the anchor point for the glasses
-        const noseBridge = landmarks[ANCHOR_POINTS.NOSE_BRIDGE];
-        const position = landmarkToVector3(noseBridge, width, height);
-
-        // 2. Calculate Rotation (Quaternion)
+        // 1. Calculate Rotation (Quaternion)
         const rotation = calculateFaceQuaternion(landmarks, width, height);
 
-        // 3. Calculate Face Width (Eye to Eye)
-        // Using outer eye corners for a more stable width measurement
-        const leftEye = landmarkToVector3(landmarks[ANCHOR_POINTS.LEFT_EYE], width, height);
-        const rightEye = landmarkToVector3(landmarks[ANCHOR_POINTS.RIGHT_EYE], width, height);
-        const faceWidth = leftEye.distanceTo(rightEye);
+        // 2. Calculate Face Width using temples (ear landmarks 234 <-> 454)
+        // Temples give a realistic glasses-width measurement
+        const leftTemple = landmarkToVector3(landmarks[ANCHOR_POINTS.LEFT_EAR], width, height);
+        const rightTemple = landmarkToVector3(landmarks[ANCHOR_POINTS.RIGHT_EAR], width, height);
+        const faceWidth = leftTemple.distanceTo(rightTemple);
 
-        // 4. Calculate Pupil Positions for Debugging
+        // 3. Pupil positions
         const leftPupil = landmarkToVector3(landmarks[ANCHOR_POINTS.LEFT_PUPIL], width, height);
         const rightPupil = landmarkToVector3(landmarks[ANCHOR_POINTS.RIGHT_PUPIL], width, height);
+
+        // 4. Anchor = midpoint between pupils — glasses center on the eyes
+        const position = new THREE.Vector3(
+            (leftPupil.x + rightPupil.x) / 2,
+            (leftPupil.y + rightPupil.y) / 2,
+            (leftPupil.z + rightPupil.z) / 2
+        );
 
         setFaceMatrix({ position, rotation, faceWidth, pupils: { left: leftPupil, right: rightPupil } });
     }, []);
